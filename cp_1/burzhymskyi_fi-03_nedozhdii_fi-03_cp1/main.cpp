@@ -52,7 +52,7 @@ wstring cleanText()
         }
     }
 
-    std::wcout << formatted;
+    //std::wcout << formatted;
     return formatted;
 }
 
@@ -79,6 +79,7 @@ wstring clearSpaces(const wstring& text)
         if(c != L' ')
             result += c;
     }
+   // wcout<<result<<'\n';
     return result;
 }
 
@@ -88,7 +89,7 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
     map<wstring, int> bigram;
     map<wstring, int> bigramWithoutSpaces;
     wcout<<'\n';
-    wcout<<"Біграми з перетином літер:\n";
+    wcout<<L"Біграми з перетином літер:\n";
     for(int i = 0; i < text.size(); ++i)
     {
         if(text[i] != L' ' && text[i+1]!=L' ')
@@ -105,13 +106,13 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
     for (const auto& [key, value] : bigram) {
         std::wcout << key << ": " << value << std::endl;
     }
-    wcout<<"Біграми без перетину літер:\n";
+    wcout<<L"Біграми без перетину літер:\n";
     for(int i = 0; i < textWithoutSpaces.size(); ++i)
     {
-        wchar_t* a = new wchar_t(text[i]);
-        wchar_t* b = new wchar_t (text[i+1]);
+        wchar_t* a = new wchar_t(textWithoutSpaces[i]);
+        wchar_t* b = new wchar_t (textWithoutSpaces[i+1]);
         wstring tmp = static_cast<wstring>(a)+ static_cast<wstring>(b);
-        bigram[tmp]++;
+        bigramWithoutSpaces[tmp]++;
         delete a;
         delete b;
     }
@@ -126,28 +127,11 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
 int main()
 {
     setlocale(LC_ALL, "ru_RU.UTF-8");
-    std::locale loc("ru_RU.UTF-8");
+
     wstring cleaned = cleanText();
     H1(cleaned);
     H2(cleaned, clearSpaces(cleaned));
-    map<wstring, int> bigram;
 
-    for(int i = 0; i < cleaned.size(); ++i)
-    {
-        if(cleaned[i] != L' ' && cleaned[i+1]!=L' ')
-        {
-            wchar_t* a = new wchar_t(cleaned[i]);
-            wchar_t* b = new wchar_t (cleaned[i+1]);
-            wstring tmp = static_cast<wstring>(a)+ static_cast<wstring>(b);
-            bigram[tmp]++;
-            delete a;
-            delete b;
-        }
-    }
-    wcout<<'\n';
-    for (const auto& [key, value] : bigram) {
-        std::wcout << key << ": " << value << std::endl;
-    }
 
     //std::wcout << result << std::endl;
     //cleanText("text.txt");
