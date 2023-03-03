@@ -4,6 +4,7 @@
 #include <cwctype>
 #include <map>
 #include <wchar.h>
+#include <cmath>
 
 using namespace std;
 
@@ -20,8 +21,8 @@ wstring cleanText()
 
     std::wstring line;
     std::wstring text = L"";
-    while (std::getline(inputFile, line)) {
-        // Виводити лише символи кирилиці від 'а' до 'я' та пробіли
+    while (std::getline(inputFile, line))
+    {
         for (auto c : line)
         {
             if (((c >= L'a' && c <= L'я') || c == L' ') && !(c>='a' && c<='z')
@@ -52,7 +53,6 @@ wstring cleanText()
         }
     }
 
-    //std::wcout << formatted;
     return formatted;
 }
 
@@ -65,10 +65,20 @@ void H1(const wstring& text)
         if(c != L' ')
             ++gram[c];
     }
-
+    long long sum = 0;
     for (const auto& [key, value] : gram) {
         std::wcout << key << ": " << value << std::endl;
+        sum+=value;
     }
+    wcout<<'\n';
+    double h1 = 0;
+    for (const auto& [key, value] : gram) {
+        double p = (double)value/(double)sum;
+        h1 += p*log2(p);
+    }
+    h1 = (-1)*h1;
+    wcout<<"H1 = "<<h1;
+    wcout<<'\n';
 }
 
 wstring clearSpaces(const wstring& text)
@@ -79,7 +89,7 @@ wstring clearSpaces(const wstring& text)
         if(c != L' ')
             result += c;
     }
-   // wcout<<result<<'\n';
+
     return result;
 }
 
@@ -90,7 +100,7 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
     map<wstring, int> bigramWithoutSpaces;
     wcout<<'\n';
     wcout<<L"Біграми з перетином літер:\n";
-    for(int i = 0; i < text.size(); ++i)
+    for(int i = 0; i < text.size() - 1; ++i)
     {
         if(text[i] != L' ' && text[i+1]!=L' ')
         {
@@ -103,11 +113,23 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
         }
     }
     wcout<<'\n';
+    long long sum = 0;
     for (const auto& [key, value] : bigram) {
         std::wcout << key << ": " << value << std::endl;
+        sum+=value;
     }
+
+    wcout<<'\n';
+    double h2 = 0;
+    for (const auto& [key, value] : bigram) {
+        double p = (double)value/(double)sum;
+        h2 += p*log2(p);
+    }
+    h2 = (-1)*h2;
+    wcout<<"H2 = "<<h2/2<<'\n';
+
     wcout<<L"Біграми без перетину літер:\n";
-    for(int i = 0; i < textWithoutSpaces.size(); ++i)
+    for(int i = 0; i < textWithoutSpaces.size() - 1; ++i)
     {
         wchar_t* a = new wchar_t(textWithoutSpaces[i]);
         wchar_t* b = new wchar_t (textWithoutSpaces[i+1]);
@@ -116,10 +138,22 @@ void H2(const wstring& text,const wstring& textWithoutSpaces)
         delete a;
         delete b;
     }
+
     wcout<<'\n';
+    sum = 0;
     for (const auto& [key, value] : bigramWithoutSpaces) {
         std::wcout << key << ": " << value << std::endl;
+        sum += value;
     }
+    wcout<<'\n';
+    h2 = 0;
+    for (const auto& [key, value] : bigramWithoutSpaces) {
+        double p = (double)value/(double)sum;
+        h2 += p*log2(p);
+    }
+    h2 = (-1)*h2;
+    wcout<<"H2 = "<<h2/2<<'\n';
+
 }
 
 
@@ -132,9 +166,6 @@ int main()
     H1(cleaned);
     H2(cleaned, clearSpaces(cleaned));
 
-
-    //std::wcout << result << std::endl;
-    //cleanText("text.txt");
 
     return 0;
 }
