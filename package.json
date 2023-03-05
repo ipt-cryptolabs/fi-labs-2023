@@ -1,0 +1,12 @@
+{
+  "name": "lab_1",
+  "version": "1.0.0",
+  "description": "Lab_1 SC",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc index.ts && node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ilya Yegorov, Denis Kobets",
+  "license": "ISC"
+}
