@@ -1,50 +1,35 @@
+import os
 import math
 import collections
 import itertools
-import string
 
 def concat_tuple(t: tuple):
+    """Concatenate all symbols in tuple. Need for creating keys.
+    Itertool prod isn't correct for me
+    """
     rez = ""
     for c in t:
         rez += c
 
     return rez
 
-def count_n_gram_apiarance(n: int, text: str) -> dict:
-    """Counts only apearance of letters and their number"""
-    alpha = set()
-    for i in text:
-        if i not in alpha and i != '\n':
-            alpha.add(i)
-
-    # print(f"size of alphabet is: {len(alpha)}")
-
+def count_n_gram_apearance(n: int, text: str, alphabet: str) -> dict:
+    """Counts only apearance of letters and their number
+    """
     n_gram_counter = collections.defaultdict(int)
+    n_gram_letter_counter = dict()
 
-    for key in itertools.product(alpha, repeat=n):
+    for key in itertools.product(alphabet, repeat=n):
         s_key = concat_tuple(key)
         reps = text.count(s_key)
         n_gram_counter[reps] += 1
-            # print(f">>{s_key}: {reps}")
+        n_gram_letter_counter[s_key] = reps
 
-    return n_gram_counter
-
-def print_dict(d: dict, width: int=22):
-    len_c = 0
-    for key in d:
-        # print(f"key: \"{key}\", value: {n_gram_counter[key]}.")
-        s = f"key: \"{key}\", value: {d[key]}"
-        print(f'{s:<24}', end="")
-        if len_c > 3:
-            len_c = 0
-            print("")
-        else:
-            len_c += 1
-    
-    print("")
-
+    return n_gram_counter, n_gram_letter_counter
 
 def count_n_gram(n: int, text: str) -> dict: 
+    """Count apearance of all leters separately.
+    """
     alpha = set()
     for i in text:
         if i not in alpha and i != '\n':
@@ -69,45 +54,92 @@ def calculate_H(n_gram_counter: dict):
         symbol apears and value as number of symbols that appears key times
         
     Returns:
-        int: entroppy value"""
-    
+        int: entroppy value
+    """
     sum_of_symbols = 0
     for key in n_gram_counter:
         sum_of_symbols += key * n_gram_counter[key]
 
-    # print(f"number of symbols is: {sum_of_symbols}")
-
     H = 0
     for key in n_gram_counter:
         if key != 0:
-            H -= (key/sum_of_symbols) * math.log(key/sum_of_symbols) * n_gram_counter[key]
+            p_i = key/sum_of_symbols
+            H -= (p_i) * math.log2(p_i) * n_gram_counter[key]
 
     return H
 
+def create_text():
+    """Convert file temp_text.txt to apropriate for me wiev and save it in rand_text.txt
+    """
+    file_text = get_text("cp_1/volynets_fi-03_cp1/temp_text.txt")
 
+    ban = [",",
+           ".",
+           "\n",
+           "!",
+           "«",
+           "»",
+           "(",
+           ")",
+           "-",
+           "=",
+           ":",
+           ";",
+           "/",
+           "§",
+           "—",
+           "_",
+           "-",
+           ]
+    with open("cp_1/volynets_fi-03_cp1/rand_text.txt", "w") as file:
+        for c in file_text:
+            if c.isalpha():
+                file.write(c.lower())
 
-rand_text = """У меня большая семья из шести человек: я, мама, папа, старшая сестра,
-бабушка и дедушка. Мы живем все вместе с собакой Бимом и кошкой Муркой в большом доме
-в деревне. Мой папа встает раньше всех, потому что ему рано на работу. Он работает доктором.
-Обычно бабушка готовит нам завтрак. Я обожаю овсяную кашу, а моя сестра Аня – блины.
-После завтрака мы собираемся и идем в школу. Моя сестра учится в пятом классе, а я –
-во втором. Мы любим учиться и играть с друзьями. Больше всего я люблю географию. Когда
-мы приходим домой из школы, мы смотрим телевизор, а потом ужинаем и делаем уроки. Иногда
-мы помогаем бабушке и маме в огороде, где они выращивают овощи и фрукты."""
+def get_text(src: str):
+    with open(src, "r") as file:
+        return file.read()
+    
+def write_n_gram_letter_counter(n_gram_letter_counter, n):
+    """I will use that function to copy and paste text for table of
+    calculated letter apearance for latex file
+    """
+    cnt = 0
+    with open(f"cp_1/volynets_fi-03_cp1/table{n}.txt", "w") as table_file:
+        table_file.write("\\begin{longtable}{rlrlrlrlrlrl}\n")
+        for c, ap in n_gram_letter_counter:
+            if cnt == 0:
+                table_file.write(f"\t{c}: & {ap}")
+            if cnt > 3:
+                table_file.write(f" & {c}: & {ap} \\\\\n")
+                cnt = 0
+            else:
+                table_file.write(f" & {c}: & {ap}")
+                cnt += 1
+        table_file.write(" \\\\\n\\end{longtable}\n")
 
 def main():
-    # n_gram_counter = count_n_gram(n=5, text=rand_text)
-
-    # print_dict(n_gram_counter)
-
-    # for key in n_gram_counter:
-    #     print(f"{key} times apears {n_gram_counter[key]} symbols.")
+        text = get_text("cp_1/volynets_fi-03_cp1/rand_text.txt")
     
-    n_gram_counter = count_n_gram_apiarance(n=1, text=rand_text)
-    print(f"H = {calculate_H(n_gram_counter)}")
+        alphabet = "щцкяхмбавинлйшдыфъжспучэьтгорюзе"
+
+        # Here i is a size of leters: 1 is leter, 2 is bigram, and other
+        # should be in range(1, 3). In other way it will work forewer (wery long)
+        for i in range(1, 3):
+            n_gram_counter, n_gram_letter_counter = count_n_gram_apearance(n=i, text=text, alphabet=alphabet)
+
+            
+            # # Next line creates files for longtable in latex
+            # n_gram_letter_counter = sorted(n_gram_letter_counter.items(), key=lambda x: x[1])
+            # write_n_gram_letter_counter(n_gram_letter_counter, n=i)            
+
+            print(f"Max(H): {math.log2(pow(len(alphabet), i))}")
+            print(f"H = {calculate_H(n_gram_counter)}\n")
 
     
 
 if __name__ == "__main__":
+    # create_text()
     main()
+
 
